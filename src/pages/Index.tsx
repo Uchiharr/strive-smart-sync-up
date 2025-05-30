@@ -14,15 +14,7 @@ const Index = () => {
   const { profile, loading } = useProfile();
   const [currentView, setCurrentView] = useState('overview');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  // If user has a specific type, default to their dashboard
+  // Move useEffect to the top, before any conditional returns
   React.useEffect(() => {
     if (profile?.user_type === 'trainer') {
       setCurrentView('trainer');
@@ -30,6 +22,14 @@ const Index = () => {
       setCurrentView('client');
     }
   }, [profile]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
