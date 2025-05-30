@@ -9,13 +9,359 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      check_ins: {
+        Row: {
+          ai_summary: string | null
+          client_id: string
+          id: string
+          progress_photos: string[] | null
+          responses: Json
+          reviewed_at: string | null
+          submitted_at: string
+          trainer_feedback: string | null
+          trainer_id: string
+          week_number: number
+        }
+        Insert: {
+          ai_summary?: string | null
+          client_id: string
+          id?: string
+          progress_photos?: string[] | null
+          responses: Json
+          reviewed_at?: string | null
+          submitted_at?: string
+          trainer_feedback?: string | null
+          trainer_id: string
+          week_number: number
+        }
+        Update: {
+          ai_summary?: string | null
+          client_id?: string
+          id?: string
+          progress_photos?: string[] | null
+          responses?: Json
+          reviewed_at?: string | null
+          submitted_at?: string
+          trainer_feedback?: string | null
+          trainer_id?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_ins_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_profiles: {
+        Row: {
+          date_of_birth: string | null
+          emergency_contact: Json | null
+          fitness_level: string | null
+          goals: string[] | null
+          height_cm: number | null
+          id: string
+          medical_conditions: string[] | null
+          trainer_id: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          date_of_birth?: string | null
+          emergency_contact?: Json | null
+          fitness_level?: string | null
+          goals?: string[] | null
+          height_cm?: number | null
+          id: string
+          medical_conditions?: string[] | null
+          trainer_id?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          date_of_birth?: string | null
+          emergency_contact?: Json | null
+          fitness_level?: string | null
+          goals?: string[] | null
+          height_cm?: number | null
+          id?: string
+          medical_conditions?: string[] | null
+          trainer_id?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_profiles_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string | null
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string | null
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_type: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+          user_type: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      trainer_profiles: {
+        Row: {
+          bio: string | null
+          brand_colors: Json | null
+          business_name: string | null
+          certifications: string[] | null
+          communication_tone: string | null
+          experience_years: number | null
+          hourly_rate: number | null
+          id: string
+          logo_url: string | null
+          specializations: string[] | null
+          timezone: string | null
+        }
+        Insert: {
+          bio?: string | null
+          brand_colors?: Json | null
+          business_name?: string | null
+          certifications?: string[] | null
+          communication_tone?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id: string
+          logo_url?: string | null
+          specializations?: string[] | null
+          timezone?: string | null
+        }
+        Update: {
+          bio?: string | null
+          brand_colors?: Json | null
+          business_name?: string | null
+          certifications?: string[] | null
+          communication_tone?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id?: string
+          logo_url?: string | null
+          specializations?: string[] | null
+          timezone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainer_profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_sessions: {
+        Row: {
+          action_items: Json | null
+          ai_summary: string | null
+          client_id: string
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          meeting_url: string | null
+          session_date: string
+          status: string | null
+          trainer_id: string
+          transcript: string | null
+        }
+        Insert: {
+          action_items?: Json | null
+          ai_summary?: string | null
+          client_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          meeting_url?: string | null
+          session_date: string
+          status?: string | null
+          trainer_id: string
+          transcript?: string | null
+        }
+        Update: {
+          action_items?: Json | null
+          ai_summary?: string | null
+          client_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          meeting_url?: string | null
+          session_date?: string
+          status?: string | null
+          trainer_id?: string
+          transcript?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_sessions_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_programs: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          description: string | null
+          difficulty_level: string | null
+          duration_weeks: number | null
+          exercises: Json
+          id: string
+          is_template: boolean | null
+          name: string
+          trainer_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration_weeks?: number | null
+          exercises: Json
+          id?: string
+          is_template?: boolean | null
+          name: string
+          trainer_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration_weeks?: number | null
+          exercises?: Json
+          id?: string
+          is_template?: boolean | null
+          name?: string
+          trainer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_programs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_programs_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

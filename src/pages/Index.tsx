@@ -8,9 +8,28 @@ import TrainerDashboard from '@/components/TrainerDashboard';
 import ClientDashboard from '@/components/ClientDashboard';
 import FeatureOverview from '@/components/FeatureOverview';
 import { Users, Brain, Dumbbell, MessageSquare, Calendar, BarChart } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
 
 const Index = () => {
+  const { profile, loading } = useProfile();
   const [currentView, setCurrentView] = useState('overview');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // If user has a specific type, default to their dashboard
+  React.useEffect(() => {
+    if (profile?.user_type === 'trainer') {
+      setCurrentView('trainer');
+    } else if (profile?.user_type === 'client') {
+      setCurrentView('client');
+    }
+  }, [profile]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -20,11 +39,18 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="flex items-center justify-center gap-2 mb-6">
               <Brain className="w-8 h-8" />
-              <h1 className="text-4xl font-bold">CoachAI Pro</h1>
+              <h1 className="text-4xl font-bold">EvolveCoach Pro</h1>
             </div>
             <p className="text-xl mb-8 text-blue-100">
               The AI-Powered Coaching Platform That Transforms Personal Training
             </p>
+            {profile && (
+              <div className="mb-6">
+                <Badge variant="secondary" className="bg-white/20 text-white text-lg px-4 py-2">
+                  Welcome back, {profile.full_name}! ({profile.user_type})
+                </Badge>
+              </div>
+            )}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
               <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
                 <Dumbbell className="w-4 h-4 mr-1" />
@@ -79,7 +105,7 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Brain className="w-6 h-6" />
-            <span className="text-xl font-semibold">CoachAI Pro</span>
+            <span className="text-xl font-semibold">EvolveCoach Pro</span>
           </div>
           <p className="text-slate-400 mb-4">
             Empowering personal trainers with AI-driven coaching tools
