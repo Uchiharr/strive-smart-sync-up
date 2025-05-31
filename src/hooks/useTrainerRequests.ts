@@ -30,13 +30,19 @@ export const useTrainerRequests = () => {
             id,
             full_name,
             email,
-            user_type
+            user_type,
+            avatar_url,
+            created_at,
+            updated_at
           ),
           client:profiles!trainer_requests_client_id_fkey (
             id,
             full_name,
             email,
-            user_type
+            user_type,
+            avatar_url,
+            created_at,
+            updated_at
           )
         `)
         .order('created_at', { ascending: false });

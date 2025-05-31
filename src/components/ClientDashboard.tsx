@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ const ClientDashboard = () => {
   const { profile, clientProfile } = useProfile();
   const { workouts, loading: workoutsLoading } = useWorkouts();
   const [completedExercises, setCompletedExercises] = useState<boolean[]>([]);
+  
+  // Check if client has a trainer - moved before useState that uses it
+  const hasTrainer = clientProfile?.trainer_id;
   const [activeTab, setActiveTab] = useState(hasTrainer ? "today" : "trainer");
 
   // Get today's workout (most recent one)
