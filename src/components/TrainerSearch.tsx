@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, Star, MessageSquare } from 'lucide-react';
+import { Users, MessageSquare } from 'lucide-react';
 import { useTrainers } from '@/hooks/useTrainers';
 import { useTrainerRequests } from '@/hooks/useTrainerRequests';
 import { toast } from 'sonner';
@@ -17,6 +16,7 @@ const TrainerSearch = () => {
   const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [requestLoading, setRequestLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleSendRequest = async () => {
     if (!selectedTrainer) return;
@@ -31,12 +31,18 @@ const TrainerSearch = () => {
       toast.success('Trainer request sent successfully!');
       setSelectedTrainer(null);
       setMessage('');
+      setDialogOpen(false);
     }
     setRequestLoading(false);
   };
 
   const hasExistingRequest = (trainerId: string) => {
     return requests.some(r => r.trainer_id === trainerId && r.status === 'pending');
+  };
+
+  const handleRequestClick = (trainerId: string) => {
+    setSelectedTrainer(trainerId);
+    setDialogOpen(true);
   };
 
   if (loading) {
@@ -104,41 +110,10 @@ const TrainerSearch = () => {
                         Request Sent
                       </Button>
                     ) : (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button onClick={() => setSelectedTrainer(trainer.id)}>
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            Request Trainer
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Request {trainer.full_name} as Your Trainer</DialogTitle>
-                            <DialogDescription>
-                              Send a message to introduce yourself and explain your fitness goals.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <Textarea
-                              placeholder="Hi! I'm interested in working with you as my personal trainer. My goals are..."
-                              value={message}
-                              onChange={(e) => setMessage(e.target.value)}
-                              rows={4}
-                            />
-                            <div className="flex gap-2 justify-end">
-                              <Button variant="outline" onClick={() => setSelectedTrainer(null)}>
-                                Cancel
-                              </Button>
-                              <Button 
-                                onClick={handleSendRequest}
-                                disabled={requestLoading}
-                              >
-                                {requestLoading ? 'Sending...' : 'Send Request'}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button onClick={() => handleRequestClick(trainer.id)}>
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Request Trainer
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -146,6 +121,38 @@ const TrainerSearch = () => {
             ))
           )}
         </div>
+        
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Request {trainers.find(t => t.id === selectedTrainer)?.full_name} as Your Trainer
+              </DialogTitle>
+              <DialogDescription>
+                Send a message to introduce yourself and explain your fitness goals.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Hi! I'm interested in working with you as my personal trainer. My goals are..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+              />
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSendRequest}
+                  disabled={requestLoading}
+                >
+                  {requestLoading ? 'Sending...' : 'Send Request'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

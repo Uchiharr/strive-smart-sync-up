@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Users, Plus, MessageSquare, Calendar, Dumbbell, BarChart, Brain } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import TrainerRequests from '@/components/TrainerRequests';
+import { toast } from 'sonner';
 
 const TrainerDashboard = () => {
   const { profile } = useProfile();
@@ -20,6 +21,30 @@ const TrainerDashboard = () => {
     { name: "Cardio Blast", exercises: 6, duration: "30 min", aiGenerated: true },
   ];
 
+  const handleCreateProgram = () => {
+    toast.info('Program creation feature coming soon! This will open a workout builder.');
+  };
+
+  const handleGenerateWithAI = () => {
+    toast.info('AI workout generation coming soon! This will create personalized workouts based on client goals.');
+  };
+
+  const handleEditTemplate = (templateName: string) => {
+    toast.info(`Editing ${templateName} - Template editor coming soon!`);
+  };
+
+  const handleAssignTemplate = (templateName: string) => {
+    if (clients.length === 0) {
+      toast.error('No clients available to assign workouts to. Accept some client requests first!');
+      return;
+    }
+    toast.info(`Assigning ${templateName} - Client assignment interface coming soon!`);
+  };
+
+  const handleMessageClient = (clientName: string) => {
+    toast.info(`Messaging ${clientName} - Client messaging system coming soon!`);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -29,8 +54,11 @@ const TrainerDashboard = () => {
           </h2>
           <p className="text-slate-600">Manage your clients and programs with AI assistance</p>
         </div>
-        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button 
+          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          onClick={handleCreateProgram}
+        >
+          <Dumbbell className="w-4 h-4 mr-2" />
           Create Program
         </Button>
       </div>
@@ -90,7 +118,11 @@ const TrainerDashboard = () => {
                           <Progress value={client.progress} className="w-16" />
                         </div>
                         <Badge variant="secondary">Active</Badge>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleMessageClient(client.name)}
+                        >
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Message
                         </Button>
@@ -110,7 +142,12 @@ const TrainerDashboard = () => {
                 <Brain className="w-12 h-12 text-blue-600 mb-4" />
                 <h3 className="font-semibold mb-2">AI Generate Workout</h3>
                 <p className="text-sm text-slate-600 mb-4">Let AI create a personalized workout plan</p>
-                <Button variant="outline">Generate with AI</Button>
+                <Button 
+                  variant="outline"
+                  onClick={handleGenerateWithAI}
+                >
+                  Generate with AI
+                </Button>
               </CardContent>
             </Card>
             
@@ -142,8 +179,21 @@ const TrainerDashboard = () => {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" className="flex-1">Edit</Button>
-                    <Button size="sm" className="flex-1">Assign</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => handleEditTemplate(template.name)}
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleAssignTemplate(template.name)}
+                    >
+                      Assign
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

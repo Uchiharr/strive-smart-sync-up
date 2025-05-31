@@ -16,6 +16,7 @@ export const useTrainers = () => {
 
   const fetchTrainers = async () => {
     try {
+      console.log('Fetching trainers...');
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -24,7 +25,12 @@ export const useTrainers = () => {
         `)
         .eq('user_type', 'trainer');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching trainers:', error);
+        throw error;
+      }
+      
+      console.log('Fetched trainers:', data);
       setTrainers(data || []);
     } catch (error) {
       console.error('Error fetching trainers:', error);

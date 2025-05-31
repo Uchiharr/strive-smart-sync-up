@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +9,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import TrainerSearch from '@/components/TrainerSearch';
 import TrainerRequests from '@/components/TrainerRequests';
+import { toast } from 'sonner';
 
 const ClientDashboard = () => {
   const { profile, clientProfile } = useProfile();
@@ -20,6 +19,8 @@ const ClientDashboard = () => {
   // Check if client has a trainer - moved before useState that uses it
   const hasTrainer = clientProfile?.trainer_id;
   const [activeTab, setActiveTab] = useState(hasTrainer ? "today" : "trainer");
+  const [selectedFeeling, setSelectedFeeling] = useState<number | null>(null);
+  const [selectedEnergy, setSelectedEnergy] = useState<string | null>(null);
 
   // Get today's workout (most recent one)
   const todayWorkout = workouts.length > 0 ? workouts[0] : null;
@@ -57,6 +58,22 @@ const ClientDashboard = () => {
   };
 
   const exercises = getExercises();
+
+  const handleSubmitCheckIn = () => {
+    if (!selectedFeeling || !selectedEnergy) {
+      toast.error('Please complete all check-in questions');
+      return;
+    }
+    
+    // Here you would typically save the check-in data to the database
+    toast.success('Check-in submitted successfully! Your trainer will review your feedback.');
+    setSelectedFeeling(null);
+    setSelectedEnergy(null);
+  };
+
+  const handleEnergySelect = (energy: string) => {
+    setSelectedEnergy(energy);
+  };
 
   return (
     <div className="space-y-8">
@@ -294,7 +311,13 @@ const ClientDashboard = () => {
                   <h4 className="font-medium mb-2">How did you feel during your workouts this week?</h4>
                   <div className="flex gap-2">
                     {['😫', '😓', '😊', '💪', '🔥'].map((emoji, index) => (
-                      <button key={index} className="text-2xl p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                      <button 
+                        key={index} 
+                        className={`text-2xl p-2 rounded-lg transition-colors ${
+                          selectedFeeling === index ? 'bg-blue-100 border-2 border-blue-500' : 'hover:bg-slate-100'
+                        }`}
+                        onClick={() => setSelectedFeeling(index)}
+                      >
                         {emoji}
                       </button>
                     ))}
@@ -304,11 +327,16 @@ const ClientDashboard = () => {
                 <div>
                   <h4 className="font-medium mb-2">Energy levels compared to last week?</h4>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">Much Lower</Button>
-                    <Button variant="outline" size="sm">Lower</Button>
-                    <Button variant="outline" size="sm">Same</Button>
-                    <Button variant="outline" size="sm">Higher</Button>
-                    <Button variant="outline" size="sm">Much Higher</Button>
+                    {['Much Lower', 'Lower', 'Same', 'Higher', 'Much Higher'].map((energy) => (
+                      <Button 
+                        key={energy}
+                        variant={selectedEnergy === energy ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => handleEnergySelect(energy)}
+                      >
+                        {energy}
+                      </Button>
+                    ))}
                   </div>
                 </div>
 
@@ -323,6 +351,7 @@ const ClientDashboard = () => {
                 <Button 
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
                   disabled={!hasTrainer}
+                  onClick={handleSubmitCheckIn}
                 >
                   {hasTrainer ? 'Submit Check-in' : 'Connect with a trainer first'}
                 </Button>
@@ -344,4 +373,3 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
-
