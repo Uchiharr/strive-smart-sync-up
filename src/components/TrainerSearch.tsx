@@ -25,7 +25,8 @@ const TrainerSearch = () => {
     const { error } = await sendTrainerRequest(selectedTrainer, message);
     
     if (error) {
-      toast.error('Failed to send request: ' + error.message);
+      const errorMessage = typeof error === 'string' ? error : error?.message || 'Unknown error occurred';
+      toast.error('Failed to send request: ' + errorMessage);
     } else {
       toast.success('Trainer request sent successfully!');
       setSelectedTrainer(null);

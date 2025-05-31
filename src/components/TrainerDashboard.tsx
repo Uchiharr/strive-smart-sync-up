@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import TrainerRequests from '@/components/TrainerRequests';
 
 const TrainerDashboard = () => {
   const { profile } = useProfile();
+  const [activeTab, setActiveTab] = useState('requests');
 
   // This would be replaced with real data from hooks
   const clients: any[] = []; // Will be populated when we implement client fetching
@@ -35,7 +35,7 @@ const TrainerDashboard = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="requests" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-4">
           <TabsTrigger value="requests">Requests</TabsTrigger>
           <TabsTrigger value="clients">Clients</TabsTrigger>
@@ -66,7 +66,7 @@ const TrainerDashboard = () => {
                   </p>
                   <Button 
                     variant="outline"
-                    onClick={() => document.querySelector('[value="requests"]')?.click()}
+                    onClick={() => setActiveTab('requests')}
                   >
                     Check Requests
                   </Button>

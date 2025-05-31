@@ -26,13 +26,13 @@ export const useTrainerRequests = () => {
         .from('trainer_requests')
         .select(`
           *,
-          trainer:trainer_id (
+          trainer:profiles!trainer_requests_trainer_id_fkey (
             id,
             full_name,
             email,
             user_type
           ),
-          client:client_id (
+          client:profiles!trainer_requests_client_id_fkey (
             id,
             full_name,
             email,

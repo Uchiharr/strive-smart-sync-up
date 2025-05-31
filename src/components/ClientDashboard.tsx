@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ const ClientDashboard = () => {
   const { profile, clientProfile } = useProfile();
   const { workouts, loading: workoutsLoading } = useWorkouts();
   const [completedExercises, setCompletedExercises] = useState<boolean[]>([]);
+  const [activeTab, setActiveTab] = useState(hasTrainer ? "today" : "trainer");
 
   // Get today's workout (most recent one)
   const todayWorkout = workouts.length > 0 ? workouts[0] : null;
@@ -70,7 +70,7 @@ const ClientDashboard = () => {
         </p>
       </div>
 
-      <Tabs defaultValue={hasTrainer ? "today" : "trainer"} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full max-w-md mx-auto grid-cols-5">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
@@ -88,7 +88,7 @@ const ClientDashboard = () => {
                 <p className="text-slate-600 mb-6">
                   You need to connect with a personal trainer to get customized workouts and guidance.
                 </p>
-                <Button onClick={() => document.querySelector('[value="trainer"]')?.click()}>
+                <Button onClick={() => setActiveTab("trainer")}>
                   Find a Trainer
                 </Button>
               </CardContent>

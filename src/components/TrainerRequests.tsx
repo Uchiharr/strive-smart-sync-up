@@ -16,7 +16,8 @@ const TrainerRequests = () => {
     const { error } = await updateRequestStatus(requestId, status);
     
     if (error) {
-      toast.error('Failed to update request: ' + error.message);
+      const errorMessage = typeof error === 'string' ? error : error?.message || 'Unknown error occurred';
+      toast.error('Failed to update request: ' + errorMessage);
     } else {
       toast.success(`Request ${status} successfully!`);
     }
