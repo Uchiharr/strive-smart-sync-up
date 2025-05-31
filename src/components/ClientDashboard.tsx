@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { useWorkouts } from '@/hooks/useWorkouts';
 import TrainerSearch from '@/components/TrainerSearch';
 import TrainerRequests from '@/components/TrainerRequests';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 const ClientDashboard = () => {
   const { profile, clientProfile } = useProfile();

@@ -58,7 +58,7 @@ const ProgramAssignment: React.FC<ProgramAssignmentProps> = ({
         .from('client_profiles')
         .select(`
           id,
-          profiles!inner(full_name)
+          profiles!client_profiles_id_fkey(full_name)
         `)
         .eq('trainer_id', user?.id);
 
