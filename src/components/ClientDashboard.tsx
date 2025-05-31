@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,9 +57,6 @@ const ClientDashboard = () => {
   };
 
   const exercises = getExercises();
-
-  // Check if client has a trainer
-  const hasTrainer = clientProfile?.trainer_id;
 
   return (
     <div className="space-y-8">
@@ -346,3 +344,4 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
+
