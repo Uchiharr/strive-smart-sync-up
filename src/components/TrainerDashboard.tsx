@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,42 +8,49 @@ import { Progress } from "@/components/ui/progress";
 import { Users, Plus, MessageSquare, Calendar, Dumbbell, BarChart, Brain } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import TrainerRequests from '@/components/TrainerRequests';
+import WorkoutBuilder from '@/components/WorkoutBuilder';
+import ClientMessaging from '@/components/ClientMessaging';
+import ProgramAssignment from '@/components/ProgramAssignment';
 import { toast } from 'sonner';
 
 const TrainerDashboard = () => {
   const { profile } = useProfile();
   const [activeTab, setActiveTab] = useState('requests');
+  const [showWorkoutBuilder, setShowWorkoutBuilder] = useState(false);
+  const [showAiWorkoutBuilder, setShowAiWorkoutBuilder] = useState(false);
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [showAssignment, setShowAssignment] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<{ id: string; name: string } | null>(null);
 
   // This would be replaced with real data from hooks
   const clients: any[] = []; // Will be populated when we implement client fetching
   const workoutTemplates = [
-    { name: "HIIT Beginner", exercises: 8, duration: "25 min", aiGenerated: true },
-    { name: "Strength Upper Body", exercises: 12, duration: "45 min", aiGenerated: false },
-    { name: "Cardio Blast", exercises: 6, duration: "30 min", aiGenerated: true },
+    { id: '1', name: "HIIT Beginner", exercises: 8, duration: "25 min", aiGenerated: true },
+    { id: '2', name: "Strength Upper Body", exercises: 12, duration: "45 min", aiGenerated: false },
+    { id: '3', name: "Cardio Blast", exercises: 6, duration: "30 min", aiGenerated: true },
   ];
 
   const handleCreateProgram = () => {
-    toast.info('Program creation feature coming soon! This will open a workout builder.');
+    setShowWorkoutBuilder(true);
   };
 
   const handleGenerateWithAI = () => {
-    toast.info('AI workout generation coming soon! This will create personalized workouts based on client goals.');
+    setShowAiWorkoutBuilder(true);
   };
 
-  const handleEditTemplate = (templateName: string) => {
-    toast.info(`Editing ${templateName} - Template editor coming soon!`);
+  const handleEditTemplate = (templateId: string, templateName: string) => {
+    toast.info(`Template editing feature coming soon for "${templateName}"!`);
   };
 
-  const handleAssignTemplate = (templateName: string) => {
-    if (clients.length === 0) {
-      toast.error('No clients available to assign workouts to. Accept some client requests first!');
-      return;
-    }
-    toast.info(`Assigning ${templateName} - Client assignment interface coming soon!`);
+  const handleAssignTemplate = (templateId: string, templateName: string) => {
+    setSelectedTemplate({ id: templateId, name: templateName });
+    setShowAssignment(true);
   };
 
-  const handleMessageClient = (clientName: string) => {
-    toast.info(`Messaging ${clientName} - Client messaging system coming soon!`);
+  const handleMessageClient = (clientId: string, clientName: string) => {
+    setSelectedClient({ id: clientId, name: clientName });
+    setShowMessaging(true);
   };
 
   return (
@@ -121,7 +129,7 @@ const TrainerDashboard = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleMessageClient(client.name)}
+                          onClick={() => handleMessageClient(client.id, client.name)}
                         >
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Message
@@ -183,14 +191,14 @@ const TrainerDashboard = () => {
                       size="sm" 
                       variant="outline" 
                       className="flex-1"
-                      onClick={() => handleEditTemplate(template.name)}
+                      onClick={() => handleEditTemplate(template.id, template.name)}
                     >
                       Edit
                     </Button>
                     <Button 
                       size="sm" 
                       className="flex-1"
-                      onClick={() => handleAssignTemplate(template.name)}
+                      onClick={() => handleAssignTemplate(template.id, template.name)}
                     >
                       Assign
                     </Button>
@@ -245,6 +253,41 @@ const TrainerDashboard = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      <WorkoutBuilder
+        isOpen={showWorkoutBuilder}
+        onClose={() => setShowWorkoutBuilder(false)}
+      />
+
+      <WorkoutBuilder
+        isOpen={showAiWorkoutBuilder}
+        onClose={() => setShowAiWorkoutBuilder(false)}
+        isAiGenerated={true}
+      />
+
+      {selectedClient && (
+        <ClientMessaging
+          isOpen={showMessaging}
+          onClose={() => {
+            setShowMessaging(false);
+            setSelectedClient(null);
+          }}
+          clientId={selectedClient.id}
+          clientName={selectedClient.name}
+        />
+      )}
+
+      {selectedTemplate && (
+        <ProgramAssignment
+          isOpen={showAssignment}
+          onClose={() => {
+            setShowAssignment(false);
+            setSelectedTemplate(null);
+          }}
+          templateId={selectedTemplate.id}
+          templateName={selectedTemplate.name}
+        />
+      )}
     </div>
   );
 };

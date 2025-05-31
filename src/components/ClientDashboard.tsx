@@ -10,6 +10,7 @@ import { useWorkouts } from '@/hooks/useWorkouts';
 import TrainerSearch from '@/components/TrainerSearch';
 import TrainerRequests from '@/components/TrainerRequests';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
 const ClientDashboard = () => {
   const { profile, clientProfile } = useProfile();
@@ -59,20 +60,50 @@ const ClientDashboard = () => {
 
   const exercises = getExercises();
 
-  const handleSubmitCheckIn = () => {
+  const handleSubmitCheckIn = async () => {
     if (!selectedFeeling || !selectedEnergy) {
       toast.error('Please complete all check-in questions');
       return;
     }
-    
-    // Here you would typically save the check-in data to the database
-    toast.success('Check-in submitted successfully! Your trainer will review your feedback.');
-    setSelectedFeeling(null);
-    setSelectedEnergy(null);
+
+    if (!hasTrainer) {
+      toast.error('You need to connect with a trainer first');
+      return;
+    }
+
+    try {
+      const responses = {
+        feeling: selectedFeeling,
+        energy: selectedEnergy,
+        timestamp: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('check_ins')
+        .insert({
+          client_id: profile?.id,
+          trainer_id: clientProfile?.trainer_id,
+          responses: JSON.stringify(responses),
+          week_number: Math.ceil(new Date().getDate() / 7) // Simple week calculation
+        });
+
+      if (error) throw error;
+
+      toast.success('Check-in submitted successfully! Your trainer will review your feedback.');
+      setSelectedFeeling(null);
+      setSelectedEnergy(null);
+    } catch (error) {
+      console.error('Error submitting check-in:', error);
+      toast.error('Failed to submit check-in');
+    }
   };
 
   const handleEnergySelect = (energy: string) => {
     setSelectedEnergy(energy);
+  };
+
+  const handleFeelingSelect = (index: number) => {
+    setSelectedFeeling(index);
   };
 
   return (
@@ -316,7 +347,7 @@ const ClientDashboard = () => {
                         className={`text-2xl p-2 rounded-lg transition-colors ${
                           selectedFeeling === index ? 'bg-blue-100 border-2 border-blue-500' : 'hover:bg-slate-100'
                         }`}
-                        onClick={() => setSelectedFeeling(index)}
+                        onClick={() => handleFeelingSelect(index)}
                       >
                         {emoji}
                       </button>
@@ -350,7 +381,7 @@ const ClientDashboard = () => {
 
                 <Button 
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
-                  disabled={!hasTrainer}
+                  disabled={!hasTrainer || !selectedFeeling || !selectedEnergy}
                   onClick={handleSubmitCheckIn}
                 >
                   {hasTrainer ? 'Submit Check-in' : 'Connect with a trainer first'}
