@@ -5,176 +5,247 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Circle, Play, BarChart, MessageSquare, Calendar, Brain } from 'lucide-react';
+import { CheckCircle, Circle, Play, BarChart, MessageSquare, Calendar, Brain, Users } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
+import { useWorkouts } from '@/hooks/useWorkouts';
+import TrainerSearch from '@/components/TrainerSearch';
+import TrainerRequests from '@/components/TrainerRequests';
 
 const ClientDashboard = () => {
-  const [completedExercises, setCompletedExercises] = useState([false, true, false, true, false]);
+  const { profile, clientProfile } = useProfile();
+  const { workouts, loading: workoutsLoading } = useWorkouts();
+  const [completedExercises, setCompletedExercises] = useState<boolean[]>([]);
 
-  const todayWorkout = {
-    name: "Upper Body Strength",
-    duration: "45 min",
-    exercises: [
-      { name: "Push-ups", sets: "3x12", completed: false },
-      { name: "Dumbbell Press", sets: "3x10", completed: true },
-      { name: "Pull-ups", sets: "3x8", completed: false },
-      { name: "Bicep Curls", sets: "3x12", completed: true },
-      { name: "Tricep Dips", sets: "3x10", completed: false },
-    ]
-  };
+  // Get today's workout (most recent one)
+  const todayWorkout = workouts.length > 0 ? workouts[0] : null;
+  
+  React.useEffect(() => {
+    if (todayWorkout?.exercises) {
+      try {
+        const exercises = Array.isArray(todayWorkout.exercises) 
+          ? todayWorkout.exercises 
+          : JSON.parse(todayWorkout.exercises as string);
+        setCompletedExercises(new Array(exercises.length).fill(false));
+      } catch (error) {
+        console.error('Error parsing exercises:', error);
+        setCompletedExercises([]);
+      }
+    }
+  }, [todayWorkout]);
 
-  const weeklyProgress = [
-    { day: "Mon", completed: true },
-    { day: "Tue", completed: true },
-    { day: "Wed", completed: false },
-    { day: "Thu", completed: true },
-    { day: "Fri", completed: false },
-    { day: "Sat", completed: false },
-    { day: "Sun", completed: false },
-  ];
-
-  const toggleExercise = (index) => {
+  const toggleExercise = (index: number) => {
     const newCompleted = [...completedExercises];
     newCompleted[index] = !newCompleted[index];
     setCompletedExercises(newCompleted);
   };
 
+  const getExercises = () => {
+    if (!todayWorkout?.exercises) return [];
+    try {
+      return Array.isArray(todayWorkout.exercises) 
+        ? todayWorkout.exercises 
+        : JSON.parse(todayWorkout.exercises as string);
+    } catch (error) {
+      console.error('Error parsing exercises:', error);
+      return [];
+    }
+  };
+
+  const exercises = getExercises();
+
+  // Check if client has a trainer
+  const hasTrainer = clientProfile?.trainer_id;
+
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Welcome back, Sarah!</h2>
-        <p className="text-slate-600">Ready for today's workout? You're doing amazing!</p>
+        <h2 className="text-3xl font-bold text-slate-800 mb-2">
+          Welcome back, {profile?.full_name || 'there'}!
+        </h2>
+        <p className="text-slate-600">
+          {hasTrainer 
+            ? "Ready for today's workout? You're doing amazing!" 
+            : "Let's find you a personal trainer to get started!"
+          }
+        </p>
       </div>
 
-      <Tabs defaultValue="today" className="space-y-6">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-4">
+      <Tabs defaultValue={hasTrainer ? "today" : "trainer"} className="space-y-6">
+        <TabsList className="grid w-full max-w-md mx-auto grid-cols-5">
           <TabsTrigger value="today">Today</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="checkin">Check-in</TabsTrigger>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
+          <TabsTrigger value="trainer">Trainer</TabsTrigger>
+          <TabsTrigger value="requests">Requests</TabsTrigger>
         </TabsList>
 
         <TabsContent value="today" className="space-y-6">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Play className="w-5 h-5 text-blue-600" />
-                        {todayWorkout.name}
-                      </CardTitle>
-                      <CardDescription>Duration: {todayWorkout.duration}</CardDescription>
+          {!hasTrainer ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No Trainer Assigned</h3>
+                <p className="text-slate-600 mb-6">
+                  You need to connect with a personal trainer to get customized workouts and guidance.
+                </p>
+                <Button onClick={() => document.querySelector('[value="trainer"]')?.click()}>
+                  Find a Trainer
+                </Button>
+              </CardContent>
+            </Card>
+          ) : workoutsLoading ? (
+            <Card>
+              <CardContent className="p-8">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                  <div className="h-32 bg-slate-200 rounded"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : !todayWorkout ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Calendar className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No Workout Today</h3>
+                <p className="text-slate-600">
+                  Your trainer hasn't assigned a workout for today yet. Check back later!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Play className="w-5 h-5 text-blue-600" />
+                          {todayWorkout.name}
+                        </CardTitle>
+                        <CardDescription>
+                          {todayWorkout.description || 'Assigned by your trainer'}
+                        </CardDescription>
+                      </div>
+                      <Badge className="bg-gradient-to-r from-blue-500 to-purple-600">
+                        Today's Workout
+                      </Badge>
                     </div>
-                    <Badge className="bg-gradient-to-r from-blue-500 to-purple-600">
-                      Today's Workout
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {todayWorkout.exercises.map((exercise, index) => (
-                      <div
-                        key={index}
-                        className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
-                          completedExercises[index] ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => toggleExercise(index)}
-                            className="text-green-600 hover:text-green-700 transition-colors"
-                          >
-                            {completedExercises[index] ? (
-                              <CheckCircle className="w-6 h-6" />
-                            ) : (
-                              <Circle className="w-6 h-6" />
-                            )}
-                          </button>
-                          <div>
-                            <h4 className={`font-medium ${completedExercises[index] ? 'line-through text-slate-500' : ''}`}>
-                              {exercise.name}
-                            </h4>
-                            <p className="text-sm text-slate-600">{exercise.sets}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {exercises.map((exercise: any, index: number) => (
+                        <div
+                          key={index}
+                          className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                            completedExercises[index] ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => toggleExercise(index)}
+                              className="text-green-600 hover:text-green-700 transition-colors"
+                            >
+                              {completedExercises[index] ? (
+                                <CheckCircle className="w-6 h-6" />
+                              ) : (
+                                <Circle className="w-6 h-6" />
+                              )}
+                            </button>
+                            <div>
+                              <h4 className={`font-medium ${completedExercises[index] ? 'line-through text-slate-500' : ''}`}>
+                                {exercise.name || `Exercise ${index + 1}`}
+                              </h4>
+                              <p className="text-sm text-slate-600">
+                                {exercise.sets || exercise.reps || exercise.duration || 'See instructions'}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600">
-                        Progress: {completedExercises.filter(Boolean).length}/{completedExercises.length} exercises
-                      </span>
-                      <Progress value={(completedExercises.filter(Boolean).length / completedExercises.length) * 100} className="w-32" />
+                      ))}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Weekly Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-7 gap-1">
-                    {weeklyProgress.map((day, index) => (
-                      <div key={index} className="text-center">
-                        <div className="text-xs text-slate-600 mb-1">{day.day}</div>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          day.completed ? 'bg-green-500 text-white' : 'bg-slate-200'
-                        }`}>
-                          {day.completed && <CheckCircle className="w-4 h-4" />}
+                    {exercises.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-slate-600">
+                            Progress: {completedExercises.filter(Boolean).length}/{completedExercises.length} exercises
+                          </span>
+                          <Progress 
+                            value={exercises.length > 0 ? (completedExercises.filter(Boolean).length / completedExercises.length) * 100 : 0} 
+                            className="w-32" 
+                          />
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">3/7</div>
-                    <div className="text-sm text-slate-600">Workouts completed</div>
-                  </div>
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-purple-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Brain className="w-5 h-5 text-purple-600" />
-                    AI Motivation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-700">
-                    "You're showing great consistency! Your strength has improved 15% this month. 
-                    Keep pushing yourself - you're closer to your goals than you think! 💪"
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Weekly Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-7 gap-1">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
+                        <div key={index} className="text-center">
+                          <div className="text-xs text-slate-600 mb-1">{day}</div>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            index < 3 ? 'bg-green-500 text-white' : 'bg-slate-200'
+                          }`}>
+                            {index < 3 && <CheckCircle className="w-4 h-4" />}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 text-center">
+                      <div className="text-2xl font-bold text-green-600">{workouts.length}/7</div>
+                      <div className="text-sm text-slate-600">Workouts completed</div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-50 to-purple-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Brain className="w-5 h-5 text-purple-600" />
+                      AI Motivation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-slate-700">
+                      "Great job staying consistent! Every workout brings you closer to your goals. 
+                      Keep up the excellent work! 💪"
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
+          )}
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Weight Progress</CardTitle>
+                <CardTitle className="text-lg">Workouts Assigned</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">-8 lbs</div>
-                <p className="text-sm text-green-600">This month</p>
+                <div className="text-3xl font-bold text-purple-600">{workouts.length}</div>
+                <p className="text-sm text-slate-600">Total programs</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Workouts</CardTitle>
+                <CardTitle className="text-lg">Completion Rate</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-600">23</div>
-                <p className="text-sm text-slate-600">Completed this month</p>
+                <div className="text-3xl font-bold text-green-600">
+                  {workouts.length > 0 ? Math.round((completedExercises.filter(Boolean).length / completedExercises.length) * 100) || 0 : 0}%
+                </div>
+                <p className="text-sm text-slate-600">This workout</p>
               </CardContent>
             </Card>
             
@@ -183,8 +254,8 @@ const ClientDashboard = () => {
                 <CardTitle className="text-lg">Streak</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">5</div>
-                <p className="text-sm text-slate-600">Days in a row</p>
+                <div className="text-3xl font-bold text-yellow-600">3</div>
+                <p className="text-sm text-slate-600">Days active</p>
               </CardContent>
             </Card>
             
@@ -193,7 +264,9 @@ const ClientDashboard = () => {
                 <CardTitle className="text-lg">Goal Progress</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-yellow-600">73%</div>
+                <div className="text-3xl font-bold text-blue-600">
+                  {workouts.length > 0 ? Math.min(workouts.length * 10, 100) : 0}%
+                </div>
                 <p className="text-sm text-slate-600">Monthly target</p>
               </CardContent>
             </Card>
@@ -240,56 +313,28 @@ const ClientDashboard = () => {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">AI Insight Preview</h4>
                   <p className="text-sm text-blue-800">
-                    Based on your previous responses, the AI will analyze your patterns and provide 
+                    Based on your responses, the AI will analyze your patterns and provide 
                     personalized recommendations for next week's training and nutrition.
                   </p>
                 </div>
 
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
-                  Submit Check-in
+                <Button 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                  disabled={!hasTrainer}
+                >
+                  {hasTrainer ? 'Submit Check-in' : 'Connect with a trainer first'}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="stats" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart className="w-5 h-5" />
-                Your Analytics
-              </CardTitle>
-              <CardDescription>AI-powered insights into your fitness journey</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-green-900 mb-2">🎯 Goal Achievement Prediction</h4>
-                  <p className="text-sm text-green-800">
-                    Based on your current progress, you're on track to reach your weight loss goal 
-                    2 weeks ahead of schedule!
-                  </p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-purple-900 mb-2">💪 Strength Improvements</h4>
-                  <p className="text-sm text-purple-800">
-                    Your upper body strength has increased by 23% over the past month. 
-                    Consider increasing weights for continued progress.
-                  </p>
-                </div>
-                
-                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-yellow-900 mb-2">⚡ Optimal Workout Times</h4>
-                  <p className="text-sm text-yellow-800">
-                    You perform best during morning workouts (7-9 AM). Your energy levels 
-                    are 34% higher compared to evening sessions.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="trainer" className="space-y-6">
+          <TrainerSearch />
+        </TabsContent>
+
+        <TabsContent value="requests" className="space-y-6">
+          <TrainerRequests />
         </TabsContent>
       </Tabs>
     </div>

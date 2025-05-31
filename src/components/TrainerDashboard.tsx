@@ -6,16 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Users, Plus, MessageSquare, Calendar, Dumbbell, BarChart, Brain } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
+import TrainerRequests from '@/components/TrainerRequests';
 
 const TrainerDashboard = () => {
-  const [selectedClient, setSelectedClient] = useState(null);
+  const { profile } = useProfile();
 
-  const clients = [
-    { id: 1, name: "Sarah Johnson", progress: 85, lastCheckIn: "2 days ago", status: "On Track" },
-    { id: 2, name: "Mike Chen", progress: 62, lastCheckIn: "1 week ago", status: "Needs Attention" },
-    { id: 3, name: "Emma Davis", progress: 94, lastCheckIn: "1 day ago", status: "Excellent" },
-  ];
-
+  // This would be replaced with real data from hooks
+  const clients: any[] = []; // Will be populated when we implement client fetching
   const workoutTemplates = [
     { name: "HIIT Beginner", exercises: 8, duration: "25 min", aiGenerated: true },
     { name: "Strength Upper Body", exercises: 12, duration: "45 min", aiGenerated: false },
@@ -26,40 +24,60 @@ const TrainerDashboard = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-slate-800">Trainer Dashboard</h2>
+          <h2 className="text-3xl font-bold text-slate-800">
+            Welcome, {profile?.full_name || 'Trainer'}!
+          </h2>
           <p className="text-slate-600">Manage your clients and programs with AI assistance</p>
         </div>
         <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
           <Plus className="w-4 h-4 mr-2" />
-          Add Client
+          Create Program
         </Button>
       </div>
 
-      <Tabs defaultValue="clients" className="space-y-6">
+      <Tabs defaultValue="requests" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-4">
+          <TabsTrigger value="requests">Requests</TabsTrigger>
           <TabsTrigger value="clients">Clients</TabsTrigger>
           <TabsTrigger value="programs">Programs</TabsTrigger>
-          <TabsTrigger value="checkins">Check-ins</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="requests" className="space-y-6">
+          <TrainerRequests />
+        </TabsContent>
+
         <TabsContent value="clients" className="space-y-6">
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Client Overview
-                </CardTitle>
-                <CardDescription>Track your client progress and engagement</CardDescription>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                My Clients
+              </CardTitle>
+              <CardDescription>Track your client progress and engagement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {clients.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-600 mb-2">No Clients Yet</h3>
+                  <p className="text-slate-500 mb-6">
+                    When clients request you as their trainer and you accept, they'll appear here.
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={() => document.querySelector('[value="requests"]')?.click()}
+                  >
+                    Check Requests
+                  </Button>
+                </div>
+              ) : (
                 <div className="space-y-4">
                   {clients.map((client) => (
                     <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                          {client.name.split(' ').map(n => n[0]).join('')}
+                          {client.name.split(' ').map((n: string) => n[0]).join('')}
                         </div>
                         <div>
                           <h3 className="font-semibold">{client.name}</h3>
@@ -71,9 +89,7 @@ const TrainerDashboard = () => {
                           <div className="text-sm font-medium">{client.progress}%</div>
                           <Progress value={client.progress} className="w-16" />
                         </div>
-                        <Badge variant={client.status === "Excellent" ? "default" : client.status === "On Track" ? "secondary" : "destructive"}>
-                          {client.status}
-                        </Badge>
+                        <Badge variant="secondary">Active</Badge>
                         <Button variant="outline" size="sm">
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Message
@@ -82,9 +98,9 @@ const TrainerDashboard = () => {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="programs" className="space-y-6">
@@ -135,38 +151,6 @@ const TrainerDashboard = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="checkins" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" />
-                Recent Check-ins
-                <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 ml-2">
-                  <Brain className="w-3 h-3 mr-1" />
-                  AI Analyzed
-                </Badge>
-              </CardTitle>
-              <CardDescription>AI-powered summaries of client check-ins</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Sarah Johnson</h4>
-                    <span className="text-sm text-slate-600">2 days ago</span>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                    <p className="text-sm"><strong>AI Summary:</strong> Sarah reported increased energy levels and completed all workouts this week. She's struggling with late-night snacking but has improved her sleep schedule.</p>
-                  </div>
-                  <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-sm"><strong>AI Recommendation:</strong> Consider adding evening meditation sessions and suggest healthy late-night snack alternatives. Current progress is excellent - maintain current workout intensity.</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
@@ -174,8 +158,8 @@ const TrainerDashboard = () => {
                 <CardTitle className="text-lg">Total Clients</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">24</div>
-                <p className="text-sm text-green-600">+3 this month</p>
+                <div className="text-3xl font-bold text-blue-600">{clients.length}</div>
+                <p className="text-sm text-green-600">Active clients</p>
               </CardContent>
             </Card>
             
@@ -184,8 +168,8 @@ const TrainerDashboard = () => {
                 <CardTitle className="text-lg">Active Programs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-600">18</div>
-                <p className="text-sm text-slate-600">85% completion rate</p>
+                <div className="text-3xl font-bold text-purple-600">0</div>
+                <p className="text-sm text-slate-600">Programs created</p>
               </CardContent>
             </Card>
             
@@ -194,7 +178,7 @@ const TrainerDashboard = () => {
                 <CardTitle className="text-lg">AI Insights</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-600">47</div>
+                <div className="text-3xl font-bold text-green-600">0</div>
                 <p className="text-sm text-slate-600">Generated this week</p>
               </CardContent>
             </Card>
@@ -204,7 +188,7 @@ const TrainerDashboard = () => {
                 <CardTitle className="text-lg">Client Satisfaction</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-yellow-600">4.8</div>
+                <div className="text-3xl font-bold text-yellow-600">--</div>
                 <p className="text-sm text-slate-600">Average rating</p>
               </CardContent>
             </Card>
