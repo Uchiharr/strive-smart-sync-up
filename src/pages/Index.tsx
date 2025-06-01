@@ -216,10 +216,10 @@ const Index = () => {
             <span>•</span>
             <span>Seamless Client Management</span>
           </div>
-        </footer>
-      </div>
-    );
-  }
+        </div>
+      </footer>
+    </div>
+  );
 };
 
 export default Index;
