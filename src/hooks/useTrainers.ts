@@ -18,7 +18,18 @@ export const useTrainers = () => {
     try {
       console.log('Fetching trainers...');
       
-      // First, let's get all profiles with user_type = 'trainer'
+      // First, let's check what profiles exist in the database
+      const { data: allProfiles, error: allProfilesError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      console.log('All profiles in database:', allProfiles);
+      
+      if (allProfilesError) {
+        console.error('Error fetching all profiles:', allProfilesError);
+      }
+
+      // Now get trainer profiles specifically
       const { data: trainerProfiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -41,7 +52,7 @@ export const useTrainers = () => {
 
       console.log('Trainer profiles found:', trainerProfiles);
 
-      // Now get the trainer_profiles data for these trainers
+      // Get the trainer_profiles data for these trainers
       const trainerIds = trainerProfiles.map(p => p.id);
       console.log('Looking for trainer details for IDs:', trainerIds);
       

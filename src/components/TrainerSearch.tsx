@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,20 +8,25 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Users, MessageSquare } from 'lucide-react';
 import { useTrainers } from '@/hooks/useTrainers';
 import { useTrainerRequests } from '@/hooks/useTrainerRequests';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const TrainerSearch = () => {
   const { trainers, loading } = useTrainers();
   const { sendTrainerRequest, requests } = useTrainerRequests();
+  const { user } = useAuth();
   const [selectedTrainer, setSelectedTrainer] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [requestLoading, setRequestLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  console.log('TrainerSearch component rendered');
-  console.log('Trainers from hook:', trainers);
-  console.log('Loading state:', loading);
-  console.log('Requests from hook:', requests);
+  useEffect(() => {
+    console.log('TrainerSearch component rendered');
+    console.log('Current user:', user);
+    console.log('Trainers from hook:', trainers);
+    console.log('Loading state:', loading);
+    console.log('Requests from hook:', requests);
+  }, [trainers, loading, requests, user]);
 
   const handleSendRequest = async () => {
     if (!selectedTrainer) return;
@@ -80,6 +85,7 @@ const TrainerSearch = () => {
             <div className="text-center text-slate-600 py-8">
               <p>No trainers available at the moment. Please check back later.</p>
               <p className="text-sm mt-2">Debug: Found {trainers.length} trainers in database</p>
+              <p className="text-xs mt-1 text-slate-500">Check browser console for detailed logs</p>
             </div>
           ) : (
             trainers.map((trainer) => (
@@ -88,6 +94,7 @@ const TrainerSearch = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{trainer.full_name}</h3>
                     <p className="text-xs text-slate-500 mb-2">ID: {trainer.id}</p>
+                    <p className="text-xs text-slate-500 mb-2">User Type: {trainer.user_type}</p>
                     {trainer.trainer_profile?.business_name && (
                       <p className="text-sm text-slate-600 mb-2">{trainer.trainer_profile.business_name}</p>
                     )}
