@@ -1,11 +1,13 @@
 
-import React from 'react';
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TrainerDashboard from '@/components/TrainerDashboard';
 import ClientDashboard from '@/components/ClientDashboard';
 import FeatureOverview from '@/components/FeatureOverview';
-import { Brain, Dumbbell, MessageSquare, BarChart } from 'lucide-react';
+import { Users, Brain, Dumbbell, MessageSquare, Calendar, BarChart } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
