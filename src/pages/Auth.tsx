@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,16 @@ import { toast } from 'sonner';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, user } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      console.log('User is authenticated, redirecting to home');
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const [signUpData, setSignUpData] = useState({
     email: '',
@@ -43,6 +51,12 @@ const Auth = () => {
     }
 
     setLoading(true);
+    console.log('Attempting to sign up with:', {
+      email: signUpData.email,
+      userType: signUpData.userType,
+      fullName: signUpData.fullName
+    });
+
     const { error } = await signUp(signUpData.email, signUpData.password, {
       full_name: signUpData.fullName,
       user_type: signUpData.userType
@@ -51,6 +65,7 @@ const Auth = () => {
     setLoading(false);
 
     if (error) {
+      console.error('Sign up error:', error);
       if (error.message.includes('already registered')) {
         toast.error('An account with this email already exists. Please sign in instead.');
       } else {
@@ -58,7 +73,7 @@ const Auth = () => {
       }
     } else {
       toast.success('Account created successfully! Please check your email to verify your account.');
-      navigate('/');
+      // Don't navigate immediately, let the auth state change handle it
     }
   };
 
@@ -66,10 +81,13 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
+    console.log('Attempting to sign in with:', signInData.email);
+
     const { error } = await signIn(signInData.email, signInData.password);
     setLoading(false);
 
     if (error) {
+      console.error('Sign in error:', error);
       if (error.message.includes('Invalid login credentials')) {
         toast.error('Invalid email or password. Please try again.');
       } else {
@@ -77,7 +95,7 @@ const Auth = () => {
       }
     } else {
       toast.success('Signed in successfully!');
-      navigate('/');
+      // Don't navigate immediately, let the auth state change handle it
     }
   };
 
