@@ -18,6 +18,11 @@ const TrainerSearch = () => {
   const [requestLoading, setRequestLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  console.log('TrainerSearch component rendered');
+  console.log('Trainers from hook:', trainers);
+  console.log('Loading state:', loading);
+  console.log('Requests from hook:', requests);
+
   const handleSendRequest = async () => {
     if (!selectedTrainer) return;
 
@@ -72,15 +77,17 @@ const TrainerSearch = () => {
       <CardContent>
         <div className="grid gap-6">
           {trainers.length === 0 ? (
-            <p className="text-center text-slate-600 py-8">
-              No trainers available at the moment. Please check back later.
-            </p>
+            <div className="text-center text-slate-600 py-8">
+              <p>No trainers available at the moment. Please check back later.</p>
+              <p className="text-sm mt-2">Debug: Found {trainers.length} trainers in database</p>
+            </div>
           ) : (
             trainers.map((trainer) => (
               <div key={trainer.id} className="border rounded-lg p-4 hover:bg-slate-50">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{trainer.full_name}</h3>
+                    <p className="text-xs text-slate-500 mb-2">ID: {trainer.id}</p>
                     {trainer.trainer_profile?.business_name && (
                       <p className="text-sm text-slate-600 mb-2">{trainer.trainer_profile.business_name}</p>
                     )}

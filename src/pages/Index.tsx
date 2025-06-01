@@ -9,9 +9,13 @@ import ClientDashboard from '@/components/ClientDashboard';
 import FeatureOverview from '@/components/FeatureOverview';
 import { Users, Brain, Dumbbell, MessageSquare, Calendar, BarChart } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const { profile, loading } = useProfile();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('overview');
 
   // Set the appropriate view based on user type
@@ -136,7 +140,7 @@ const Index = () => {
     );
   }
 
-  // Default overview for users without a specific type
+  // Default overview for users without authentication or specific type
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Hero Section */}
@@ -165,38 +169,23 @@ const Index = () => {
               </Badge>
             </div>
             
-            <Tabs value={currentView} onValueChange={setCurrentView} className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 bg-white/10 backdrop-blur-sm">
-                <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white data-[state=active]:text-blue-600">
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="trainer" className="text-white data-[state=active]:bg-white data-[state=active]:text-blue-600">
-                  Trainer View
-                </TabsTrigger>
-                <TabsTrigger value="client" className="text-white data-[state=active]:bg-white data-[state=active]:text-blue-600">
-                  Client View
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            {/* Sign In / Sign Up Button */}
+            <div className="mb-8">
+              <Button 
+                size="lg" 
+                className="bg-white text-blue-600 hover:bg-white/90 text-lg px-8 py-4"
+                onClick={() => navigate('/auth')}
+              >
+                Sign In / Sign Up
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Only Overview */}
       <div className="container mx-auto px-4 py-12">
-        <Tabs value={currentView} onValueChange={setCurrentView}>
-          <TabsContent value="overview">
-            <FeatureOverview />
-          </TabsContent>
-          
-          <TabsContent value="trainer">
-            <TrainerDashboard />
-          </TabsContent>
-          
-          <TabsContent value="client">
-            <ClientDashboard />
-          </TabsContent>
-        </Tabs>
+        <FeatureOverview />
       </div>
 
       {/* Footer */}
